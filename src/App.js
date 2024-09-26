@@ -28,55 +28,54 @@ const CardItem = ({ title, iconClass, description, link, color }) => {
 const App = () => {
   return (
     <Router>
-      <Container className="mt-4"> 
-        <Row>
-        <Col md={4} className="mb-4">
-          <CardItem 
-            title="Monitoreo" 
-            iconClass="bi bi-graph-up"  
-            description="Accede al módulo de monitoreo."
-            link="/mantenimiento"
-            color="#f0ad4e"  
-          />
-        </Col>
-        <Col md={4}>
-          <CardItem 
-            title="Almacenamiento" 
-            iconClass="bi bi-server"  
-            description="Accede al módulo de almacenamiento."
-            link="/almacenamiento"
-            color="#28a745"  
-          />
-        </Col>
-        <Col md={4}>
-          <CardItem 
-            title="Reconstrucción" 
-            iconClass="bi bi-tools"   
-            description="Accede al módulo de reconstrucción."
-            link="/codificador"
-            color="#007bff" 
-          />
-        </Col>
-        <Col md={4}>
-          <CardItem 
-            title="Resolver inconsistencias" 
-            iconClass="bi bi-exclamation-triangle"  
-            description="Accede al módulo de resolver inconsistencias."
-            link="/resolver-inconsistencias"
-            color="#dc3545"  
-          />
-        </Col>
+ <Container  className="mt-4">
+ <div className="scroll-container">
+    <div className="card-column">
+      <CardItem
+        title="Monitoreo"
+        iconClass="bi bi-graph-up"
+        description="Monitorea en tiempo real tus discos."
+        link="/mantenimiento"
+        color="#f0ad4e"
+      />
+    </div>
+    <div className="card-column">
+      <CardItem
+        title="Almacenamiento"
+        iconClass="bi bi-server"
+        description="Almacenamiento automatizado segun se requiera."
+        link="/almacenamiento"
+        color="#28a745"
+      />
+    </div>
+    <div className="card-column">
+      <CardItem
+        title="Reconstrucción"
+        iconClass="bi bi-tools"
+        description="Recuperación de datos ante fallos críticos ."
+        link="/codificador"
+        color="#007bff"
+      />
+    </div>
+    <div className="card-column">
+      <CardItem
+        title="Resolver inconsistencias"
+        iconClass="bi bi-exclamation-triangle"
+        description="Resolver inconsistencias en los datos ."
+        link="/resolver-inconsistencias"
+        color="#dc3545"
+      />
+    </div>
+  </div>
+  <Card className="p-4 shadow mt-4" style={{ borderRadius: '15px', borderColor: '#e0e0e0' }}>
+    <Routes>
+      <Route path="/mantenimiento" element={<Mantenimiento />} />
+      <Route path="/almacenamiento" element={<Almacenamiento />} />
+      <Route path="/codificador" element={<Codificador />} />
+    </Routes>
+  </Card>
+</Container>
 
-        </Row>
- 
-        <Card className="p-4 shadow mt-4" style={{ borderRadius: '15px', borderColor: '#e0e0e0' }}>
-              <Routes>
-                <Route path="/mantenimiento" element={<Mantenimiento />} />
-                <Route path="/almacenamiento" element={<Almacenamiento />} />
-                <Route path="/codificador" element={<Codificador />} />
-              </Routes>
-            </Card>
-      </Container>
     </Router>
   );
 };
