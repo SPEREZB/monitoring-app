@@ -63,3 +63,30 @@
 body{
   background-color: #f0f8ff; 
 }
+
+
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px;
+  scrollbar-width: thin;
+}
+
+.scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+.card-column {
+  min-width: 200px;
+  margin-right: 10px;
+  flex: 0 0 auto;
+} 
