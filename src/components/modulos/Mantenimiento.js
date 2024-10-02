@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
-import Discos from "./Discos";
+import { Container, Row, Col, Card, Spinner, Button  } from "react-bootstrap"; 
+import Error_Reports from "../complementos/Error_Reports";
+import Discos from "../complementos/Discos";
+import './../../styles/mantenimiento.css'; 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
 import io from "socket.io-client";
-import { socketIO } from "./../services/socketIO"
+import { socketIO } from "../../services/socketIO"
 
 const MySwal = withReactContent(Swal);
 const socket = io("http://127.0.0.1:5000");
@@ -19,6 +21,7 @@ const Mantenimiento = () => {
   const [smartDevices, setSmartDevices] = useState([]);
   const [selectedDisk, setSelectedDisk] = useState(null);
   const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false); 
 
   const [diskUsagePercent, setDiskUsagePercent] = useState(0);
   const [diskErrors, setDiskErrors] = useState(0);
@@ -76,6 +79,16 @@ const Mantenimiento = () => {
     hasShownCriticalAlert = false;
     choose_disk(device, index);
   }; 
+
+  const navigateToErrorReports = () => {
+    setShowOverlay(true); // Muestra el overlay al hacer clic en el botón
+  };
+
+  const closeOverlay = () => {
+    setShowOverlay(false); // Oculta el overlay
+  };
+
+
   return (
     <Container className="mt-1">
         <Discos
@@ -148,6 +161,58 @@ const Mantenimiento = () => {
                 </Card>
               </Col>
             </Row>
+            <Row className="mb-3">
+          <Col>
+            <Button
+              variant="danger"
+              className="shadow-sm"
+              style={{
+                backgroundColor: "#dc3545",
+                borderColor: "#dc3545",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                fontSize: "1.1rem",
+              }}  
+              onClick={() => navigateToErrorReports()} 
+            > 
+
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              Reportes de Errores Encontrados
+            </Button>
+          </Col>
+        </Row>
+        
+        {showOverlay && (
+            <div className="overlay">
+            <div className="overlay-content">
+              <Button
+                variant="secondary"
+                className="close-overlay"
+                onClick={closeOverlay}
+                style={{
+                  position: "absolute", 
+                  top: "10px", 
+                  left: "10px", 
+                  zIndex: 10,  
+                  backgroundColor: "#6c757d",  
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "40px",
+                  height: "40px",
+                  padding: "5px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                ✕  
+              </Button>
+              <Error_Reports alerts={alerts} />  
+            </div>
+          </div>
+          
+              )}
+
 
             <Row className="mt-2">
               <Col>

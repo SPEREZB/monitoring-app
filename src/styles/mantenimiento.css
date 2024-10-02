@@ -1,0 +1,41 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro y semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999; /* Para asegurarse de que esté por encima de otros elementos */
+  }
+  
+  .overlay-content {
+    background-color: white; /* Fondo blanco para el contenido */
+    border-radius: 12px; /* Bordes redondeados */
+    padding: 20px;
+    width: 90%; /* Ancho del contenido */
+    height: auto;
+    max-width: 800px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .overlay-content-balanced {
+    background-color: white;  
+    border-radius: 15px;  
+    height: auto;
+    width: 20%;
+    padding: 20px;  
+    text-align: center;  
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  }
+
+  .close-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+  }
+  

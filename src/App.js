@@ -1,14 +1,15 @@
 import React, { useState } from 'react'; 
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { Container, Card } from 'react-bootstrap';
-import Codificador from './components/Codificador';
-import Almacenamiento from './components/Almacenamiento';
-import Mantenimiento from './components/Mantenimiento';  
+import Reconstruccion from './components/modulos/Reconstruccion';
+import Almacenamiento from './components/modulos/Almacenamiento';
+import Mantenimiento from './components/modulos/Mantenimiento'; 
+import Error_Reports from './components/complementos/Error_Reports'; 
 import './App.css'; 
 
 const CardItem = ({ title, iconClass, description, link, color }) => {
   const navigate = useNavigate();
-  const [bgColor, setBgColor] = useState('white');
+  const [bgColor, setBgColor] = useState('white'); 
 
   const handleClick = () => {
     setBgColor('white'); 
@@ -60,7 +61,7 @@ const App = () => {
           </div>
           <div className="card-column">
             <CardItem
-              title="Reconstrucción"
+              title="Recuperación de datos"
               iconClass="bi bi-tools"
               description="Recuperación de datos ante fallos críticos."
               link="/codificador"
@@ -81,7 +82,8 @@ const App = () => {
           <Routes>
             <Route path="/mantenimiento" element={<Mantenimiento />} />
             <Route path="/almacenamiento" element={<Almacenamiento />} />
-            <Route path="/codificador" element={<Codificador />} />
+            <Route path="/codificador" element={<Reconstruccion />} /> 
+
           </Routes>
         </Card>
       </Container>

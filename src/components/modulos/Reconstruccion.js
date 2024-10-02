@@ -1,10 +1,9 @@
-// src/components/Codificador.js
 
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 
-const Codificador = () => {
+const Reconstruccion = () => {
   const [datos, setDatos] = useState('');
   const [resultadoCodificado, setResultadoCodificado] = useState('');
   const [resultadoDecodificado, setResultadoDecodificado] = useState('');
@@ -31,7 +30,7 @@ const Codificador = () => {
     <Container className="mt-5">
       <Row>
         <Col>
-          <h1 className="text-center">Codificación y Decodificación</h1>
+          <h1 className="text-center">Recuperación</h1>
           <Form>
             <Form.Group controlId="formDatos">
               <Form.Label>Datos</Form.Label>
@@ -67,4 +66,4 @@ const Codificador = () => {
   );
 };
 
-export default Codificador;
+export default Reconstruccion;
