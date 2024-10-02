@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Card, Container } from 'react-bootstrap';
 
-const Error_Reports = ({ alerts }) => {
-  const errorAlerts = alerts.filter(alert => alert.includes('Estado: Crítico'));
+const Error_Reports = () => { 
+  const [errorAlerts, setAlerts] = useState([]);
+
+  const get_alerts_errors = async () => { 
+
+    const response = await axios.get(
+      "http://127.0.0.1:5000/api/report_alerts"
+    );
+      
+      setAlerts(response.data.alerts);
+  };
+
+  useEffect(() => {
+    get_alerts_errors();
+  }, []); 
+
 
   return (
     <Container>

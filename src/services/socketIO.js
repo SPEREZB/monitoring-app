@@ -4,7 +4,7 @@ import Swal from 'sweetalert2'; // Para las alertas de MySwal
 
 const socket = io("http://127.0.0.1:5000"); 
 
-export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, setDiskErrors, setIsLoading, setIsError, handleNewAlert) => {
+export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, setDiskErrors,setTasaDeteccion, setIsLoading, setIsError, handleNewAlert) => {
     socket.on("connect", () => {
         console.log("Conectado al servidor Socket.IO");
     });
@@ -27,6 +27,7 @@ export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, 
                     handleNewAlert(newAlerts.alerts, newAlerts.definitions);
                     setDiskUsagePercent(newAlerts.disk[0]);
                     setDiskErrors(newAlerts.disk[1]);
+                    setTasaDeteccion(newAlerts.disk[2]);
                     setIsLoading(false);
                 }
             } else {
@@ -41,6 +42,7 @@ export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, 
                     handleNewAlert(newAlerts.alerts, newAlerts.definitions);
                     setDiskUsagePercent(newAlerts.disk[0]);
                     setDiskErrors(newAlerts.disk[1]);
+                    setTasaDeteccion(newAlerts.disk[2]);
                     setIsLoading(false);
                 }
             }

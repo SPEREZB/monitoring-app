@@ -208,28 +208,28 @@ const Almacenamiento = () => {
                 selectedDiskIndex={selectedDiskIndex}   
                 handleDiskSelection={handleDiskSelection} 
             />
-
-      <h1 className="text-center">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1>
-
       {loading && (
         <div className="text-center mb-4"> 
             <span className="sr-only">Cargando...</span> 
         </div>
       )}
 
-      {error && <Alert variant="danger">{error}</Alert>}
-      {success && <Alert variant="success">{success}</Alert>}
+      <h1 className="text-center">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1>
+
+
       <div className="text-center mb-4">
         <Button
           variant="warning"
           onClick={handleBalanceDisks}
           className="btn-lg rounded-pill shadow"
-        >
+          >
           <i className="bi bi-box-arrow-in-down me-2"></i>  
           Ajustar Almacenamiento
         </Button>
       </div>
 
+          {error && <Alert variant="danger">{error}</Alert>}
+          {success && <Alert variant="success">{success}</Alert>}
       {balancing && (
   <div className="overlay">
   <div className="overlay-content-balanced">
@@ -251,7 +251,7 @@ const Almacenamiento = () => {
             <Row className="text-center mb-4">
               <Col>
                 <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
-                <Card.Title>Información de Almacenamiento</Card.Title>
+                <Card.Title>Información de Almacenamiento "Simulación de un disco real"</Card.Title>
               </Col>
             </Row>
             <Row>

@@ -83,6 +83,7 @@ const App = () => {
             <Route path="/mantenimiento" element={<Mantenimiento />} />
             <Route path="/almacenamiento" element={<Almacenamiento />} />
             <Route path="/codificador" element={<Reconstruccion />} /> 
+            <Route path="/mantenimiento/reportes" element={<Error_Reports />} /> 
 
           </Routes>
         </Card>

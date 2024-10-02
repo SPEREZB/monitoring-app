@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Spinner, Button  } from "react-bootstrap"; 
 import Error_Reports from "../complementos/Error_Reports";
 import Discos from "../complementos/Discos";
@@ -9,10 +10,8 @@ import axios from "axios";
 import io from "socket.io-client";
 import { socketIO } from "../../services/socketIO"
 
-const MySwal = withReactContent(Swal);
-const socket = io("http://127.0.0.1:5000");
-
-
+const MySwal = withReactContent(Swal); 
+ 
 
 const Mantenimiento = () => {
   const [alerts, setAlerts] = useState([]);
@@ -25,8 +24,11 @@ const Mantenimiento = () => {
 
   const [diskUsagePercent, setDiskUsagePercent] = useState(0);
   const [diskErrors, setDiskErrors] = useState(0);
+  const [tasaDeteccion, setTasaDeteccion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  const navigate = useNavigate(); 
 
   let diskIndex;
   let hasShownCriticalAlert = false;
@@ -39,7 +41,7 @@ const Mantenimiento = () => {
       "http://127.0.0.1:5000/api/choose_devices",
       { name: diskEscogido }
     );
-    socketIO(index,setAlerts,setDefinitions,setDiskUsagePercent,setDiskErrors,setIsLoading,setIsError,handleNewAlert);
+    socketIO(index,setAlerts,setDefinitions,setDiskUsagePercent,setDiskErrors,setTasaDeteccion,setIsLoading,setIsError,handleNewAlert);
   };
 
   const handleNewAlert = async (newAlerts, definitions) => {
@@ -80,12 +82,12 @@ const Mantenimiento = () => {
     choose_disk(device, index);
   }; 
 
-  const navigateToErrorReports = () => {
-    setShowOverlay(true); // Muestra el overlay al hacer clic en el botón
+  const navigateToErrorReports = () => { 
+    navigate('reportes');
   };
 
   const closeOverlay = () => {
-    setShowOverlay(false); // Oculta el overlay
+    setShowOverlay(false);  
   };
 
 
@@ -154,7 +156,7 @@ const Mantenimiento = () => {
                       </span>
                       <br />
                       <small>
-                        Tasa de detección automática de errores: 98%
+                        Tasa de detección automática de errores: {tasaDeteccion} %
                       </small>
                     </Card.Text>
                   </Card.Body>
