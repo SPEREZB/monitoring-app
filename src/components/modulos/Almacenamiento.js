@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Discos from "../complementos/Discos"; 
-import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar, Spinner } from 'react-bootstrap';
+import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar, Spinner } from 'react-bootstrap'; 
 import 'bootstrap-icons/font/bootstrap-icons.css'; 
 import balanza from './../../assets/balanza.gif'
 
@@ -25,13 +25,18 @@ const Almacenamiento = () => {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const [balancing, setBalancing] = useState(false); 
-  const [reloadDiscos, setReloadDiscos] = useState(false); 
-
+  const [reloadDiscos, setReloadDiscos] = useState(false);  
   const [disk, setDisk] = useState([]);
   const [smartDevices, setSmartDevices] = useState([]); 
   const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
   const [selectedDisk, setSelectedDisk] = useState(null);
   const [isLoading, setIsLoading] = useState(true); 
+  const porcentajeUsado = (storageInfo.used_space / storageInfo.capacity) * 100;
+  const [alertasMostradas, setAlertasMostradas] = useState([]);
+
+  const [criticalThreshold, setCriticalThreshold] = useState(100); 
+const [warningThreshold, setWarningThreshold] = useState(90);   
+const [generalThreshold, setGeneralThreshold] = useState(80); 
 
   const fetchStorageInfo = async () => {
     setLoading(true);
@@ -116,29 +121,40 @@ const Almacenamiento = () => {
     }
   };
 
+  const alertas=(titulo, mensaje, icono)=>
+  {
+    MySwal.fire({
+      title: titulo,
+      text: mensaje,
+      icon: icono,
+      confirmButtonText: 'Aceptar',
+    }); 
+  } 
+
   const handleBalanceDisks = async () => {
     try {  
-      setBalancing(true);
-      // const response = await axios.post('http://127.0.0.1:5000/api/data/balance', { disk });
-      // setBalancing(false);
+      setBalancing(true); 
       
-      // const data = response.data;
+      const response = await axios.post('http://127.0.0.1:5000/api/data/balance', { disk });
+      setBalancing(false); 
+      setReloadDiscos(prevState => !prevState);
+      const data = response.data;
       
-      // if (data.status === 'Balance completado') {
-      //   setDisk(data.disks);  
-      //   setReloadDiscos((prev) => !prev);
-      //   setSuccess('Discos balanceados correctamente.');
-      //   setError(null);
-      // } else {
-      //   setError('Error al balancear discos');
-      // }
+      if (data.status === 'Balance completado') {
+        setDisk(data.disks);  
+        alertas("¡Discos Balanceados Correctamente!", "", "success");
+        setReloadDiscos((prev) => !prev); 
+        setSuccess('Discos balanceados correctamente.');
+        setError(null);
+      } else {
+        setError('Error al balancear discos');
+      }
+      verificarAlertas();
     } catch (err) {
       setError('Error al balancear discos');
       setSuccess(null);
     }
-  };
-  
-  
+  }; 
 
   const handleDiskSelection = (index, device) => {
     setIsLoading(true);
@@ -159,42 +175,73 @@ const Almacenamiento = () => {
       { name: diskEscogido }
     ); 
   };
+ 
+
+  const convertToGB = (value) => {
+    // Si contiene 'GB', solo convierte a número
+    if (value.includes('GB')) {
+      return parseFloat(value) * 1; // ya está en GB
+    }
+    // Si contiene 'MB', convierte a GB
+    else if (value.includes('MB')) {
+      return parseFloat(value) / 1024; // 1 GB = 1024 MB
+    }
+    // Puedes agregar más unidades si es necesario (por ejemplo, TB)
+    return 0; // Devuelve 0 si la unidad no es reconocida
+  };
+
+  
+  const verificarAlertas = () => {
+    disk.forEach((discos, index) => {
+      const sizeNum = convertToGB(discos.size);
+      const usedNum = convertToGB(discos.used);
+  
+      const porcentajeUtilizado = (usedNum / sizeNum) * 100;
+  
+      if (porcentajeUtilizado > warningThreshold && !alertasMostradas.includes(discos.filesystem)) {
+        alertas(`¡Advertencia! Disco ${discos.filesystem}`, `El disco está utilizando el ${porcentajeUtilizado.toFixed(2)}% del espacio. ¡Considera liberar espacio!`, "warning");
+        setAlertasMostradas((prevAlertas) => [...prevAlertas, discos.filesystem]);
+      }
+    });
+  
+    if (porcentajeUsado > generalThreshold && !alertasMostradas.includes("basica")) {
+      alertas("¡Alerta basica!", `El almacenamiento supera el ${generalThreshold}%. ¡Considera añadir otro disco!`, "info");
+      setAlertasMostradas((prevAlertas) => [...prevAlertas, "basica"]);
+    }
+  
+    if (porcentajeUsado > criticalThreshold && !alertasMostradas.includes("fallo")) {
+      alertas("¡Peligro de fallo en el disco!", `El uso del disco está al ${criticalThreshold}%. Esto podría malograr el disco. ¡Libera espacio de inmediato!`, "error");
+      setAlertasMostradas((prevAlertas) => [...prevAlertas, "fallo"]);
+    }
+  
+    if (selectedDisk && porcentajeUsado > criticalThreshold && !alertasMostradas.includes("fallo en cierto disco")) {
+      alertas(`Disco ${selectedDisk} al límite`, "El disco seleccionado está casi lleno. ¡Considera retirarlo antes de dañarlo!", "error");
+      setAlertasMostradas((prevAlertas) => [...prevAlertas, "fallo en cierto disco"]);
+    }
+  }; 
+
+  const handleModifyThresholds = (e) => {
+    e.preventDefault();
+    setWarningThreshold(parseInt(warningThreshold));
+    setCriticalThreshold(parseInt(criticalThreshold));
+    setGeneralThreshold(parseInt(generalThreshold));
+    setSuccess("Umbrales actualizados correctamente.");
+    verificarAlertas();
+  };
+  
 
   useEffect(() => {
     fetchStorageInfo();
   }, []);
-
-  const porcentajeUsado = (storageInfo.used_space / storageInfo.capacity) * 100;
-
   // Alertas críticas según las condiciones establecidas
   useEffect(() => {
-    if (porcentajeUsado > 80) {
-      MySwal.fire({
-        title: "¡Alerta Crítica!",
-        text: "El almacenamiento supera el 80%. ¡Considera añadir otro disco!",
-        icon: "warning",
-        confirmButtonText: "Aceptar",
-      });
-    }
-
-    if (porcentajeUsado === 100) {
-      MySwal.fire({
-        title: "¡Peligro de fallo en el disco!",
-        text: "El uso del disco está al 100%. Esto podría malograr el disco. ¡Libera espacio de inmediato!",
-        icon: "error",
-        confirmButtonText: "Aceptar",
-      });
-    }
-
-    if (selectedDisk && porcentajeUsado > 90) {
-      MySwal.fire({
-        title: `Disco ${selectedDisk} al límite`,
-        text: "El disco seleccionado está casi lleno. ¡Considera retirarlo antes de dañarlo!",
-        icon: "warning",
-        confirmButtonText: "Aceptar",
-      });
-    }
-  }, [porcentajeUsado, selectedDisk]);
+    const interval = setInterval(() => {
+      verificarAlertas();
+      setReloadDiscos(prevState => !prevState);
+    }, 5000); 
+  
+    return () => clearInterval(interval);  
+  }, [porcentajeUsado, selectedDisk, disk,alertasMostradas]); 
 
   return (
     <Container className="mt-5">
@@ -214,9 +261,8 @@ const Almacenamiento = () => {
         </div>
       )}
 
-      <h1 className="text-center">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1>
-
-
+      <h1 className="text-center">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1> 
+   
       <div className="text-center mb-4">
         <Button
           variant="warning"
@@ -244,47 +290,128 @@ const Almacenamiento = () => {
   </div>
 </div> 
       )}
-
-      {storageInfo && (
-        <Card className="mb-4 shadow-lg">
-          <Card.Body>
-            <Row className="text-center mb-4">
-              <Col>
-                <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
-                <Card.Title>Información de Almacenamiento "Simulación de un disco real"</Card.Title>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Card.Text>
-                  <i className="bi bi-hdd" style={{ marginRight: '10px' }}></i>
-                  <strong>Capacidad Total:</strong> {storageInfo.capacity} GB
-                </Card.Text>
-              </Col>
-              <Col>
-                <Card.Text>
-                  <i className="bi bi-cloud-upload-fill" style={{ marginRight: '10px' }}></i>
-                  <strong>Espacio Utilizado:</strong> {storageInfo.used_space} GB
-                </Card.Text>
-              </Col>
-              <Col>
-                <Card.Text>
-                  <i className="bi bi-hdd-fill" style={{ marginRight: '10px' }}></i>
-                  <strong>Espacio Disponible:</strong> {storageInfo.available_space} GB
-                </Card.Text>
-              </Col>
-            </Row>
-
-            <ProgressBar
-              now={porcentajeUsado}
-              label={`${porcentajeUsado.toFixed(2)}% usado`}
-              variant={porcentajeUsado > 80 ? 'danger' : 'success'}
-              className="mb-3"
-            />
-          </Card.Body>
-        </Card>
-      )}
  
+ {disk.length === 0 ? ( 
+  <Card className="mb-4 shadow-lg">
+    <Card.Body>
+      <Row className="text-center mb-4">
+        <Col>
+          <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
+          <Card.Title>Información de Almacenamiento "Simulación de un disco real"</Card.Title>
+        </Col>
+      </Row>
+      <Col>
+        <p>No es a cargado información.</p>
+      </Col>
+    </Card.Body>
+  </Card>
+) : (
+  <Card className="mb-4 shadow-lg">
+    <Card.Body>
+      <Row className="text-center mb-4">
+        <Col>
+          <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
+          <Card.Title>Información de Almacenamiento</Card.Title>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Card.Text>
+            <i className="bi bi-hdd" style={{ marginRight: '10px' }}></i>
+            <strong>Capacidad Total:</strong> {disk[0].size} GB
+          </Card.Text>
+        </Col>
+        <Col>
+          <Card.Text>
+            <i className="bi bi-cloud-upload-fill" style={{ marginRight: '10px' }}></i>
+            <strong>Espacio Utilizado:</strong> {disk[0].used} GB
+          </Card.Text>
+        </Col>
+        <Col>
+          <Card.Text>
+            <i className="bi bi-hdd-fill" style={{ marginRight: '10px' }}></i>
+            <strong>Espacio Disponible:</strong> {(parseFloat(disk[0].size) - parseFloat(disk[0].used)).toFixed(2)} GB
+          </Card.Text>
+        </Col>
+      </Row>
+      <ProgressBar
+        now={(parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100}
+        label={`${((parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100).toFixed(2)}% usado`}
+        variant={(parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100 > 80 ? 'danger' : 'success'}
+        className="mb-3"
+      />
+    </Card.Body>
+  </Card>
+)}
+
+<Card className="mb-4 shadow-lg">
+
+  
+<div className="container mt-4"> 
+      <Form onSubmit={handleModifyThresholds}>
+        <Row className="g-3">
+          <Col md={4}>
+            <Form.Group controlId="warningThreshold">
+              <Form.Label className="d-flex align-items-center">
+                <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                Umbral de advertencia (%)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={warningThreshold}
+                onChange={(e) => setWarningThreshold(e.target.value)}
+                placeholder="Ej: 75"
+                required
+                className="form-control"
+              />
+              <Form.Text className="text-muted">
+                Establezca el porcentaje que activa una advertencia.
+              </Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group controlId="criticalThreshold">
+              <Form.Label className="d-flex align-items-center">
+                <i className="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                Umbral crítico (%)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={criticalThreshold}
+                onChange={(e) => setCriticalThreshold(e.target.value)}
+                placeholder="Ej: 90"
+                required
+                className="form-control"
+              />
+              <Form.Text className="text-muted">
+                Establezca el porcentaje que activa una alerta crítica.
+              </Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group controlId="generalThreshold">
+              <Form.Label className="d-flex align-items-center">
+                <i className="bi bi-circle-fill text-info me-2"></i>
+                Umbral basico (%)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={generalThreshold}
+                onChange={(e) => setGeneralThreshold(e.target.value)}
+                placeholder="Ej: 100"
+                required
+                className="form-control"
+              />
+              <Form.Text className="text-muted">
+                Establezca el porcentaje general para los límites.
+              </Form.Text>
+            </Form.Group>
+          </Col>
+        </Row> 
+        <Button variant="primary" type="submit" className="mt-3 mb-3">Guardar Umbrales</Button>
+      </Form>
+    </div>
+    </Card>
       <Card className="mb-4 shadow-lg">
         <Card.Body> 
         <Form onSubmit={handleModifySpaceAndCapacity}>
@@ -296,7 +423,7 @@ const Almacenamiento = () => {
               type="number"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
-              min="0" // Solo permite números positivos
+              min="0"  
               placeholder="Introduce la capacidad total en GB"
             />
           </Form.Group>
@@ -309,7 +436,7 @@ const Almacenamiento = () => {
               type="number"
               value={usedSpace}
               onChange={(e) => setUsedSpace(e.target.value)}
-              min="0" // Solo permite números positivos
+              min="0" 
               placeholder="Introduce el espacio utilizado en GB"
             />
           </Form.Group>
@@ -352,8 +479,7 @@ const Almacenamiento = () => {
       </Card>
  
       <Row> 
-
-      {/* Tarjeta de Liberar Espacio de Almacenamiento */}
+ 
       <Col xs={12} md={6}>
         <Card className="mb-4 shadow-lg">
           <Card.Body>
@@ -368,7 +494,7 @@ const Almacenamiento = () => {
               value={releaseSpace}
               onChange={(e) => setReleaseSpace(e.target.value)}
               min="0"
-              max="500" // Máximo configurable para liberar espacio
+              max="500" 
               style={{ accentColor: 'red', width: '100%' }}
             />
             <Button className="mt-3" variant="danger" onClick={liberarEspacio}>

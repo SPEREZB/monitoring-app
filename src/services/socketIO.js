@@ -25,9 +25,8 @@ export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, 
                     setAlerts(filteredAlerts);
                     setDefinitions(newAlerts.definitions);
                     handleNewAlert(newAlerts.alerts, newAlerts.definitions);
-                    setDiskUsagePercent(newAlerts.disk[0]);
-                    setDiskErrors(newAlerts.disk[1]);
-                    setTasaDeteccion(newAlerts.disk[2]);
+                    setDiskUsagePercent(newAlerts.disk[0]); 
+                    setTasaDeteccion(newAlerts.disk[1]);
                     setIsLoading(false);
                 }
             } else {
@@ -41,8 +40,7 @@ export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, 
                     setDefinitions(newAlerts.definitions);
                     handleNewAlert(newAlerts.alerts, newAlerts.definitions);
                     setDiskUsagePercent(newAlerts.disk[0]);
-                    setDiskErrors(newAlerts.disk[1]);
-                    setTasaDeteccion(newAlerts.disk[2]);
+                    setTasaDeteccion(newAlerts.disk[1]); 
                     setIsLoading(false);
                 }
             }

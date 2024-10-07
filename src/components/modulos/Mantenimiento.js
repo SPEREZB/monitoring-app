@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Spinner, Button  } from "react-bootstrap"; 
+import { Container, Row, Col, Card, Spinner, Button, Modal  } from "react-bootstrap"; 
 import Error_Reports from "../complementos/Error_Reports";
 import Discos from "../complementos/Discos";
 import './../../styles/mantenimiento.css'; 
@@ -20,13 +20,15 @@ const Mantenimiento = () => {
   const [smartDevices, setSmartDevices] = useState([]);
   const [selectedDisk, setSelectedDisk] = useState(null);
   const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
-  const [showOverlay, setShowOverlay] = useState(false); 
-
+  const [showOverlay, setShowOverlay] = useState(false);  
   const [diskUsagePercent, setDiskUsagePercent] = useState(0);
   const [diskErrors, setDiskErrors] = useState(0);
   const [tasaDeteccion, setTasaDeteccion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [showModal, setShowModal] = useState(false); 
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
 
   const navigate = useNavigate(); 
 
@@ -145,26 +147,70 @@ const Mantenimiento = () => {
                     borderRadius: "10px",
                   }}
                 >
-                  <Card.Body>
-                    <Card.Title className="text-center d-flex align-items-center justify-content-center">
-                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                      Errores en el Disco
-                    </Card.Title>
-                    <Card.Text className="text-center">
-                      <span className="badge bg-light text-dark p-2">
-                        {diskErrors > 0 ? `${diskErrors}` : `Sin errores`}
-                      </span>
-                      <br />
-                      <small>
-                        Tasa de detección automática de errores: {tasaDeteccion} %
-                      </small>
-                    </Card.Text>
-                  </Card.Body>
+             <Card.Body className="position-relative">
+        {/* Icono de interrogación en la esquina superior derecha */}
+        <i 
+          className="bi bi-question-circle-fill position-absolute" 
+          style={{ top: "10px", right: "10px", fontSize: "1.2rem", cursor: "pointer" }}
+          title="Más información sobre los errores en el disco"
+          onClick={handleShowModal} // Abre el modal al hacer clic en el ícono
+        ></i>
+
+        <Card.Title className="text-center d-flex align-items-center justify-content-center">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          Errores en el Disco
+        </Card.Title>
+
+        <Card.Text className="text-center">
+          <span className="badge bg-light text-dark p-2">
+            {tasaDeteccion !== undefined ? `${tasaDeteccion}` : `Sin errores`}
+          </span>
+          <br /> 
+        </Card.Text>
+      </Card.Body>
+
+      {/* Modal de información */}
+      <Modal
+  show={showModal}
+  onHide={handleCloseModal}
+  centered // Para centrar el modal en la pantalla
+  backdrop="static" // Impide que se cierre el modal al hacer clic fuera
+>
+  <Modal.Header closeButton style={{ backgroundColor: "#f8f9fa", borderBottom: "none" }}>
+    <Modal.Title className="d-flex align-items-center">
+      <i className="bi bi-info-circle-fill me-2" style={{ color: "#0d6efd" }}></i>
+      Información Importante
+    </Modal.Title>
+  </Modal.Header>
+  
+  <Modal.Body style={{ backgroundColor: "#fefefe", padding: "20px 30px", textAlign: "justify" }}> 
+    <div className="alert alert-info" style={{ marginTop: "15px" }}>
+      <i className="bi bi-check-circle-fill me-2"></i>
+      Se verificará el porcentaje de errores encontrados en base a los errores detectados en el reporte de errores.
+      En caso de que ya se hayan corregido esos errores, se podrá actualizar la lista del reporte con los reportes que se esten detectando.
+    </div>
+  </Modal.Body>
+  
+  <Modal.Footer style={{ backgroundColor: "#f8f9fa", borderTop: "none" }}>
+    <Button
+      variant="success"
+      onClick={handleCloseModal}
+      className="px-4"
+      style={{ borderRadius: "50px", backgroundColor: "#ff6b6b", borderColor: "#198754" }}
+    >
+      <i className="bi bi-x-circle me-2"></i>
+      Cerrar
+    </Button>
+  </Modal.Footer>
+</Modal>
+
                 </Card>
               </Col>
             </Row>
             <Row className="mb-3">
-          <Col>
+
+          <Col> 
+       
             <Button
               variant="danger"
               className="shadow-sm"
@@ -179,9 +225,10 @@ const Mantenimiento = () => {
             > 
 
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              Reportes de Errores Encontrados
+              Reportes de errores encontrados
             </Button>
           </Col>
+
         </Row>
         
         {showOverlay && (
