@@ -52,18 +52,7 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
       setLoading(false);
     }
   };
-
-  const adjustCapacityAutomatically = (newUsedSpace) => {
-    if (newUsedSpace / storageInfo.capacity > 0.8) {
-      const newCapacity = Math.ceil(newUsedSpace * 1.2);
-      setStorageInfo((prevInfo) => ({
-        ...prevInfo,
-        capacity: newCapacity,
-        available_space: newCapacity - newUsedSpace,
-      }));
-      setSuccess('La capacidad de almacenamiento ha sido ajustada automáticamente.');
-    }
-  };
+ 
 
   const handleModifySpaceAndCapacity = (e) => {
     e.preventDefault();
@@ -81,29 +70,7 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
       setSuccess('Espacio y capacidad actualizados correctamente.');
       setError(null);
     }
-  };
-
-  const handleAdjustDemand = async (e) => {
-    e.preventDefault();
-    const newDemand = parseInt(demand);
-  
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/api/data/adjust', { demand: newDemand });
-         
-        const data = await response.data; 
-        setStorageInfo({
-          capacity: data.capacity,    
-          used_space: data.used_space,  
-          available_space: data.available_space, 
-        });
-        setSuccess('Capacidad ajustada según la demanda.');
-        setError(null); 
-    } catch (err) {
-      setError('Error al ajustar la capacidad de almacenamiento.');
-      setSuccess(null);
-    }
-  };
-
+  }; 
   const liberarEspacio = () => {
     const newAvailableSpace = storageInfo.available_space + 10;
     const newUsedSpace = storageInfo.used_space - 10;
@@ -177,17 +144,14 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
   };
  
 
-  const convertToGB = (value) => {
-    // Si contiene 'GB', solo convierte a número
+  const convertToGB = (value) => { 
     if (value.includes('GB')) {
-      return parseFloat(value) * 1; // ya está en GB
-    }
-    // Si contiene 'MB', convierte a GB
+      return parseFloat(value) * 1;  
+    } 
     else if (value.includes('MB')) {
-      return parseFloat(value) / 1024; // 1 GB = 1024 MB
-    }
-    // Puedes agregar más unidades si es necesario (por ejemplo, TB)
-    return 0; // Devuelve 0 si la unidad no es reconocida
+      return parseFloat(value) / 1024;  
+    } 
+    return 0;  
   };
 
   
@@ -233,7 +197,7 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
   useEffect(() => {
     fetchStorageInfo();
   }, []);
-  // Alertas críticas según las condiciones establecidas
+   
   useEffect(() => {
     const interval = setInterval(() => {
       verificarAlertas();
@@ -308,38 +272,72 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
 ) : (
   <Card className="mb-4 shadow-lg">
     <Card.Body>
-      <Row className="text-center mb-4">
-        <Col>
-          <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
-          <Card.Title>Información de Almacenamiento</Card.Title>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Card.Text>
-            <i className="bi bi-hdd" style={{ marginRight: '10px' }}></i>
-            <strong>Capacidad Total:</strong> {disk[0].size} GB
-          </Card.Text>
-        </Col>
-        <Col>
-          <Card.Text>
-            <i className="bi bi-cloud-upload-fill" style={{ marginRight: '10px' }}></i>
-            <strong>Espacio Utilizado:</strong> {disk[0].used} GB
-          </Card.Text>
-        </Col>
-        <Col>
-          <Card.Text>
-            <i className="bi bi-hdd-fill" style={{ marginRight: '10px' }}></i>
-            <strong>Espacio Disponible:</strong> {(parseFloat(disk[0].size) - parseFloat(disk[0].used)).toFixed(2)} GB
-          </Card.Text>
-        </Col>
-      </Row>
-      <ProgressBar
-        now={(parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100}
-        label={`${((parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100).toFixed(2)}% usado`}
-        variant={(parseFloat(disk[0].used) / parseFloat(disk[0].size)) * 100 > 80 ? 'danger' : 'success'}
-        className="mb-3"
-      />
+    <Row className="text-center mb-4">
+  <Col>
+    <i className="bi bi-hdd-network" style={{ fontSize: '2rem', color: '#0d6efd' }}></i>
+    <Card.Title>Información de Almacenamiento del Todos los Discos</Card.Title>
+  </Col>
+</Row> 
+<Row>
+  <Col>
+    <Card.Text>
+      <i className="bi bi-hdd" style={{ marginRight: '10px' }}></i>
+      <strong>Capacidad Total:</strong> {disk.reduce((total, d) => total + (parseFloat(d.size) || 0), 0).toFixed(2)} GB
+    </Card.Text>
+  </Col>
+  <Col>
+    <Card.Text>
+      <i className="bi bi-cloud-upload-fill" style={{ marginRight: '10px' }}></i>
+      <strong>Espacio Utilizado:</strong> {(
+        disk.reduce((total, d) => {
+          const usedInGB = (parseFloat(d.used) || 0) / (d.used.includes('MB') ? 1024 : 1);  
+          return total + usedInGB;
+        }, 0)
+      ).toFixed(2)} GB
+    </Card.Text>
+  </Col>
+  <Col>
+    <Card.Text>
+      <i className="bi bi-hdd-fill" style={{ marginRight: '10px' }}></i>
+      <strong>Espacio Disponible:</strong> {(
+        disk.reduce((total, d) => total + (parseFloat(d.size) || 0), 0) - 
+        disk.reduce((total, d) => {
+          const usedInGB = (parseFloat(d.used) || 0) / (d.used.includes('MB') ? 1024 : 1);
+          return total + usedInGB;
+        }, 0)
+      ).toFixed(2)} GB
+    </Card.Text>
+  </Col>
+</Row>
+<ProgressBar
+  now={(() => {
+    const totalUsed = disk.reduce((total, d) => {
+      const usedInGB = (parseFloat(d.used) || 0) / (d.used.includes('MB') ? 1024 : 1);
+      return total + usedInGB;
+    }, 0);
+    const totalSize = disk.reduce((total, d) => total + (parseFloat(d.size) || 0), 0);
+    return totalSize > 0 ? (totalUsed / totalSize) * 100 : 0;  
+  })()}
+  label={`${(() => {
+    const totalUsed = disk.reduce((total, d) => {
+      const usedInGB = (parseFloat(d.used) || 0) / (d.used.includes('MB') ? 1024 : 1);
+      return total + usedInGB;
+    }, 0);
+    const totalSize = disk.reduce((total, d) => total + (parseFloat(d.size) || 0), 0);
+    return totalSize > 0 ? `${((totalUsed / totalSize) * 100).toFixed(2)}% usado` : '0% usado';  
+  })()}`}
+  variant={(() => {
+    const totalUsed = disk.reduce((total, d) => {
+      const usedInGB = (parseFloat(d.used) || 0) / (d.used.includes('MB') ? 1024 : 1);
+      return total + usedInGB;
+    }, 0);
+    const totalSize = disk.reduce((total, d) => total + (parseFloat(d.size) || 0), 0);
+    return totalSize > 0 && (totalUsed / totalSize) * 100 > 80 ? 'danger' : 'success';  
+  })()}
+  className="mb-3"
+/>
+
+
     </Card.Body>
   </Card>
 )}

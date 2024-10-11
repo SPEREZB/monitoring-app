@@ -23,7 +23,6 @@ const Discos = ({
   const handleAddDisk = () => {
     getDisks();
   };
-  
 
   const handleRemoveDisk = () => {
     if (selectedDiskIndex !== null) {
@@ -36,27 +35,26 @@ const Discos = ({
   };
 
   const getDisks = async () => {
-  
     const response = await axios.get("http://127.0.0.1:5000/api/get_devices");
 
-        const formattedDevices = response.data.devices.map((device) => {
-          const usedBytes = device.used; // device.used en bytes
-          const totalBytes = device.size; // device.size en bytes
+    const formattedDevices = response.data.devices.map((device) => {
+      const usedBytes = device.used; // device.used en bytes
+      const totalBytes = device.size; // device.size en bytes
 
-          const porcentajeUsado = (usedBytes / totalBytes) * 100;
+      const porcentajeUsado = (usedBytes / totalBytes) * 100;
 
-          return {
-            ...device,
-            size: formatBytes(totalBytes),
-            used: formatBytes(usedBytes),
-            porcentajeUsado: porcentajeUsado.toFixed(2),
-          };
-        });
+      return {
+        ...device,
+        size: formatBytes(totalBytes),
+        used: formatBytes(usedBytes),
+        porcentajeUsado: porcentajeUsado.toFixed(2),
+      };
+    });
 
-        setDisk(formattedDevices);
-        setSmartDevices(response.data.smartctl_devices);
-        setIsLoading(true);
-  }
+    setDisk(formattedDevices);
+    setSmartDevices(response.data.smartctl_devices);
+    setIsLoading(true);
+  };
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -141,6 +139,12 @@ const Discos = ({
                   <Card.Text className="text-center" style={{ color: "#888" }}>
                     <i className="bi bi-bar-chart-fill me-1"></i> Utilizado:{" "}
                     <span style={{ fontWeight: "bold", color: "#ff6347" }}>{diskItem.used}</span>
+                  </Card.Text>
+                  <Card.Text className="text-center" style={{ color: "#888" }}>
+                    <i className="bi bi-pie-chart-fill me-1"></i> Porcentaje Usado:{" "}
+                    <span style={{ fontWeight: "bold", color: "#28a745" }}>
+                      {diskItem.porcentajeUsado}%
+                    </span>
                   </Card.Text>
                   {selectedDiskIndex === index && (
                     <div

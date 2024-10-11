@@ -4,18 +4,18 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro y semitransparente */
+    background-color: rgba(0, 0, 0, 0.7);  
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999; /* Para asegurarse de que esté por encima de otros elementos */
+    z-index: 999;  
   }
   
   .overlay-content {
-    background-color: white; /* Fondo blanco para el contenido */
-    border-radius: 12px; /* Bordes redondeados */
+    background-color: white;  
+    border-radius: 12px;  
     padding: 20px;
-    width: 90%; /* Ancho del contenido */
+    width: 90%; 
     height: auto;
     max-width: 800px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);

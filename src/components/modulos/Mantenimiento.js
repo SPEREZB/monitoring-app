@@ -69,7 +69,7 @@ const Mantenimiento = () => {
           confirmButtonText: "Aceptar",
         });
 
-        hasShownCriticalAlert = true;
+       hasShownCriticalAlert = true;
       }
 
       startIndex = criticalIndex + 1;
@@ -147,13 +147,12 @@ const Mantenimiento = () => {
                     borderRadius: "10px",
                   }}
                 >
-             <Card.Body className="position-relative">
-        {/* Icono de interrogación en la esquina superior derecha */}
+             <Card.Body className="position-relative"> 
         <i 
           className="bi bi-question-circle-fill position-absolute" 
           style={{ top: "10px", right: "10px", fontSize: "1.2rem", cursor: "pointer" }}
           title="Más información sobre los errores en el disco"
-          onClick={handleShowModal} // Abre el modal al hacer clic en el ícono
+          onClick={handleShowModal}  
         ></i>
 
         <Card.Title className="text-center d-flex align-items-center justify-content-center">
@@ -168,13 +167,12 @@ const Mantenimiento = () => {
           <br /> 
         </Card.Text>
       </Card.Body>
-
-      {/* Modal de información */}
+ 
       <Modal
   show={showModal}
   onHide={handleCloseModal}
-  centered // Para centrar el modal en la pantalla
-  backdrop="static" // Impide que se cierre el modal al hacer clic fuera
+  centered  
+  backdrop="static"  
 >
   <Modal.Header closeButton style={{ backgroundColor: "#f8f9fa", borderBottom: "none" }}>
     <Modal.Title className="d-flex align-items-center">
@@ -266,7 +264,7 @@ const Mantenimiento = () => {
             <Row className="mt-2">
               <Col>
                 <h3 className="text-left">
-                  Propiedades del disco obtenidas por la función SMART
+                  Estados del disco obtenidos por la función SMART
                 </h3>
               </Col>
             </Row>
