@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Discos from "../complementos/Discos"; 
 import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar, Spinner } from 'react-bootstrap'; 
+import alertas from '../../utilities/alerts/alerts';
 import 'bootstrap-icons/font/bootstrap-icons.css'; 
-import balanza from './../../assets/balanza.gif'
-
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
-
-const MySwal = withReactContent(Swal);
+import balanza from './../../assets/balanza.gif' 
+import diskInterceptor from '../../interceptors/diskInterceptor';
+ 
 
 const Almacenamiento = () => {
   const [storageInfo, setStorageInfo] = useState({
@@ -35,8 +33,10 @@ const Almacenamiento = () => {
   const [alertasMostradas, setAlertasMostradas] = useState([]);
 
   const [criticalThreshold, setCriticalThreshold] = useState(100); 
-const [warningThreshold, setWarningThreshold] = useState(90);   
-const [generalThreshold, setGeneralThreshold] = useState(80); 
+  const [warningThreshold, setWarningThreshold] = useState(90);   
+  const [generalThreshold, setGeneralThreshold] = useState(80); 
+
+  const {choose_disk} = diskInterceptor();
 
   const fetchStorageInfo = async () => {
     setLoading(true);
@@ -87,17 +87,7 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
       setError(null);
     }
   };
-
-  const alertas=(titulo, mensaje, icono)=>
-  {
-    MySwal.fire({
-      title: titulo,
-      text: mensaje,
-      icon: icono,
-      confirmButtonText: 'Aceptar',
-    }); 
-  } 
-
+ 
   const handleBalanceDisks = async () => {
     try {  
       setBalancing(true); 
@@ -128,21 +118,13 @@ const [generalThreshold, setGeneralThreshold] = useState(80);
     diskIndex = index;
     setSelectedDiskIndex(index);
     hasShownCriticalAlert = false;
-    choose_disk(device, index);
+    setSelectedDisk(device);
+    choose_disk(device);
   }; 
 
   let diskIndex;
   let hasShownCriticalAlert = false;
-
-  const choose_disk = async (diskEscogido, index) => {
-    setSelectedDisk(diskEscogido);
-
-    await axios.post(
-      "http://127.0.0.1:5000/api/choose_devices",
-      { name: diskEscogido }
-    ); 
-  };
- 
+  
 
   const convertToGB = (value) => { 
     if (value.includes('GB')) {

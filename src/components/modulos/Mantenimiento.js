@@ -9,6 +9,7 @@ import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
 import io from "socket.io-client";
 import { socketIO } from "../../services/socketIO"
+import diskInterceptor from '../../interceptors/diskInterceptor';
 
 const MySwal = withReactContent(Swal); 
  
@@ -28,23 +29,15 @@ const Mantenimiento = () => {
   const [isError, setIsError] = useState(false);
   const [showModal, setShowModal] = useState(false); 
   const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
-
+  const handleCloseModal = () => setShowModal(false); 
   const navigate = useNavigate(); 
+
+  const {choose_disk} = diskInterceptor();
 
   let diskIndex;
   let hasShownCriticalAlert = false;
 
-    
-  const choose_disk = async (diskEscogido, index) => {
-    setSelectedDisk(diskEscogido);
-
-   await axios.post(
-      "http://127.0.0.1:5000/api/choose_devices",
-      { name: diskEscogido }
-    );
-    socketIO(index,setAlerts,setDefinitions,setDiskUsagePercent,setDiskErrors,setTasaDeteccion,setIsLoading,setIsError,handleNewAlert);
-  };
+     
 
   const handleNewAlert = async (newAlerts, definitions) => {
     let startIndex = 0;
@@ -81,7 +74,9 @@ const Mantenimiento = () => {
     diskIndex = index;
     setSelectedDiskIndex(index);
     hasShownCriticalAlert = false;
-    choose_disk(device, index);
+    setSelectedDisk(device);
+    choose_disk(device);
+    socketIO(index,setAlerts,setDefinitions,setDiskUsagePercent,setDiskErrors,setTasaDeteccion,setIsLoading,setIsError,handleNewAlert);
   }; 
 
   const navigateToErrorReports = () => { 

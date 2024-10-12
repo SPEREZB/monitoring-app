@@ -1,6 +1,7 @@
 import { Row, Col, Card, Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react"; 
+import diskInterceptor from './../../interceptors/diskInterceptor';
+import format from "../../utilities/formated/formated";  
 
 const Discos = ({
   disk,
@@ -13,18 +14,33 @@ const Discos = ({
 }) => {
   const [reloadDiscos, setReloadDiscos] = useState(false);
 
-  function formatBytes(bytes) {
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    if (bytes === 0) return "0 Bytes";
-    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    return (bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
-  }
+  const {getDisks, removeDisk} = diskInterceptor();
 
-  const handleAddDisk = () => {
-    getDisks();
+  const {formatBytes} = format();
+ 
+  const handleAddDisk = async () => {
+   const response= await getDisks(); 
+   const formattedDevices = response.data.devices.map((device) => {
+    const usedBytes = device.used; // device.used en bytes
+    const totalBytes = device.size; // device.size en bytes
+
+    const porcentajeUsado = (usedBytes / totalBytes) * 100;
+
+    return {
+      ...device,
+      size: formatBytes(totalBytes),
+      used: formatBytes(usedBytes),
+      porcentajeUsado: porcentajeUsado.toFixed(2),
+    };
+  });
+
+  setDisk(formattedDevices);
+  setSmartDevices(response.data.smartctl_devices);
+  setIsLoading(true);
   };
 
   const handleRemoveDisk = () => {
+    diskInterceptor.errorDisk();
     if (selectedDiskIndex !== null) {
       const updatedDisks = disk.filter((_, index) => index !== selectedDiskIndex);
       setDisk(updatedDisks);
@@ -33,33 +49,12 @@ const Discos = ({
       console.log("No hay disco seleccionado para eliminar.");
     }
   };
-
-  const getDisks = async () => {
-    const response = await axios.get("http://127.0.0.1:5000/api/get_devices");
-
-    const formattedDevices = response.data.devices.map((device) => {
-      const usedBytes = device.used; // device.used en bytes
-      const totalBytes = device.size; // device.size en bytes
-
-      const porcentajeUsado = (usedBytes / totalBytes) * 100;
-
-      return {
-        ...device,
-        size: formatBytes(totalBytes),
-        used: formatBytes(usedBytes),
-        porcentajeUsado: porcentajeUsado.toFixed(2),
-      };
-    });
-
-    setDisk(formattedDevices);
-    setSmartDevices(response.data.smartctl_devices);
-    setIsLoading(true);
-  };
+ 
 
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        getDisks();
+        handleAddDisk();
       } catch (error) {
         console.error("Error fetching devices:", error);
       }
