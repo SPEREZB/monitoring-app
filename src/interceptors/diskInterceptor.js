@@ -14,10 +14,24 @@ const diskInterceptor =()=>
           { name: diskEscogido }
         ); 
       };
+      const balancedDisk = async (disk) => { 
+        const response = await axios.post('http://127.0.0.1:5000/api/data/balance', { disk });
+
+        return response;
+      }; 
+      const liberarDisk = async (ruta) => { 
+        try {
+          const response = await axios.post('http://127.0.0.1:5000/api/data/liberar', { ruta });
+          return response;
+      } catch (error) {
+          console.error("Error al liberar espacio:", error);  
+          throw error; 
+      }
+      }; 
 
       const removeDisk = () => {
       
       };
-      return { getDisks, choose_disk, removeDisk };
+      return { getDisks, choose_disk, balancedDisk, liberarDisk, removeDisk };
 };
 export default diskInterceptor;

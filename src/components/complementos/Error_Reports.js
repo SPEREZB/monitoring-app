@@ -23,7 +23,7 @@ const Error_Reports = () => {
   };
 
   useEffect(() => {
-    get_alerts_errors();
+    handleAlertsErrors();
    // check_identified_errors();
   }, []); 
 

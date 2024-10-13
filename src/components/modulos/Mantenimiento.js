@@ -3,15 +3,10 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import { Container, Row, Col, Card, Spinner, Button, Modal  } from "react-bootstrap"; 
 import Error_Reports from "../complementos/Error_Reports";
 import Discos from "../complementos/Discos";
-import './../../styles/mantenimiento.css'; 
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import axios from "axios";
-import io from "socket.io-client";
+import './../../styles/mantenimiento.css';  
 import { socketIO } from "../../services/socketIO"
 import diskInterceptor from '../../interceptors/diskInterceptor';
-
-const MySwal = withReactContent(Swal); 
+import alertas from "./../../utilities/alerts/alerts" 
  
 
 const Mantenimiento = () => {
@@ -55,13 +50,7 @@ const Mantenimiento = () => {
         const description =
           definitions[criticalIndex] || "Se ha detectado una alerta crítica.";
 
-        await MySwal.fire({
-          title: "¡Alerta Crítica!",
-          text: description,
-          icon: "error",
-          confirmButtonText: "Aceptar",
-        });
-
+        alertas("¡Alerta Crítica!", description, "error"); 
        hasShownCriticalAlert = true;
       }
 

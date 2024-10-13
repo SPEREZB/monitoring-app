@@ -5,8 +5,10 @@ import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar, Spinner } 
 import alertas from '../../utilities/alerts/alerts';
 import 'bootstrap-icons/font/bootstrap-icons.css'; 
 import balanza from './../../assets/balanza.gif' 
+import trash from './../../assets/trash.gif' 
 import diskInterceptor from '../../interceptors/diskInterceptor';
- 
+import formated from '../../utilities/formated/formated';
+
 
 const Almacenamiento = () => {
   const [storageInfo, setStorageInfo] = useState({
@@ -15,28 +17,27 @@ const Almacenamiento = () => {
     available_space: 60,
   });
   const [usedSpace, setUsedSpace] = useState('');
-  const [capacity, setCapacity] = useState('');
-  const [demand, setDemand] = useState('');
-  const [addSpace, setAddSpace] = useState('');
-  const [releaseSpace, setReleaseSpace] = useState('');
+  const [capacity, setCapacity] = useState(''); 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const [balancing, setBalancing] = useState(false); 
+  const [trashConst, setTrash] = useState(false); 
   const [reloadDiscos, setReloadDiscos] = useState(false);  
   const [disk, setDisk] = useState([]);
   const [smartDevices, setSmartDevices] = useState([]); 
   const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
   const [selectedDisk, setSelectedDisk] = useState(null);
   const [isLoading, setIsLoading] = useState(true); 
-  const porcentajeUsado = (storageInfo.used_space / storageInfo.capacity) * 100;
-  const [alertasMostradas, setAlertasMostradas] = useState([]);
-
+  const porcentajeUsado = (storageInfo.used_space / storageInfo.capacity) * 100; 
+  const [alertasMostradas, setAlertasMostradas] = useState([]); 
   const [criticalThreshold, setCriticalThreshold] = useState(100); 
   const [warningThreshold, setWarningThreshold] = useState(90);   
   const [generalThreshold, setGeneralThreshold] = useState(80); 
+  const [rutaCache, setRutaCache] = useState('');
 
-  const {choose_disk} = diskInterceptor();
+  const {choose_disk, balancedDisk, liberarDisk} = diskInterceptor();
+  const {convertToGB}= formated();
 
   const fetchStorageInfo = async () => {
     setLoading(true);
@@ -90,9 +91,8 @@ const Almacenamiento = () => {
  
   const handleBalanceDisks = async () => {
     try {  
-      setBalancing(true); 
-      
-      const response = await axios.post('http://127.0.0.1:5000/api/data/balance', { disk });
+      setBalancing(true);  
+      const response = await balancedDisk(disk);
       setBalancing(false); 
       setReloadDiscos(prevState => !prevState);
       const data = response.data;
@@ -122,19 +122,26 @@ const Almacenamiento = () => {
     choose_disk(device);
   }; 
 
+  const handleLiberar = async (ruta) => {
+    if(rutaCache!="" && rutaCache!=undefined)
+    {
+
+    
+      setTrash(true);
+      const response = await liberarDisk(rutaCache); 
+
+      setTimeout(() => {
+        setTrash(false);
+        alertas("Espacio liberado con éxito", "Se ha liberado: "+ response.data +" archivos", "success");
+      }, 4000);
+    }
+  }; 
+
+
+
   let diskIndex;
   let hasShownCriticalAlert = false;
-  
-
-  const convertToGB = (value) => { 
-    if (value.includes('GB')) {
-      return parseFloat(value) * 1;  
-    } 
-    else if (value.includes('MB')) {
-      return parseFloat(value) / 1024;  
-    } 
-    return 0;  
-  };
+   
 
   
   const verificarAlertas = () => {
@@ -191,7 +198,7 @@ const Almacenamiento = () => {
 
   return (
     <Container className="mt-5">
-         <Discos
+         <Discos 
                 key={reloadDiscos}
                 disk={disk} 
                 smartDevices={smartDevices}  
@@ -461,27 +468,51 @@ const Almacenamiento = () => {
       <Row> 
  
       <Col xs={12} md={6}>
-        <Card className="mb-4 shadow-lg">
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <label htmlFor="releaseRange" className="form-label">
-                Liberar Espacio: {releaseSpace} GB
-              </label> 
-            </div>
-            <input
-              id="releaseRange"
-              type="range"
-              value={releaseSpace}
-              onChange={(e) => setReleaseSpace(e.target.value)}
-              min="0"
-              max="500" 
-              style={{ accentColor: 'red', width: '100%' }}
+      <Card className="mb-4 shadow-lg">
+      <Card.Body>
+  <div className="row">
+    <div className="col-md-6">
+      <div className="form-group">
+        <label htmlFor="rutaCache">Usuario:</label>
+        <input
+          type="text"
+          id="rutaCache"
+          className="form-control"
+          value={rutaCache}
+          onChange={(e) => setRutaCache(e.target.value)}
+          placeholder="Ingrese cual es su usuario en su PC/LAPTOP"
+          required
+        />
+      </div>
+    </div>
+    <div className="col-md-5">
+      <div className="d-flex flex-column align-items-center"> 
+      <Button className="mt-3" variant="danger" onClick={handleLiberar}>
+  <div className="d-flex align-items-center">
+    <i className="bi bi-trash fs-1"></i> 
+    <span>Liberar Espacio</span>
+  </div>
+</Button>
+      </div>
+    </div>
+  </div>
+</Card.Body>
+ 
+      {trashConst && (
+        <div className="overlay">
+          <div className="overlay-content-balanced">
+            <img 
+              src={trash} 
+              alt="Balanceando..." 
+              style={{ width: '100%', maxWidth: '150px', height: 'auto' }} 
             />
-            <Button className="mt-3" variant="danger" onClick={liberarEspacio}>
-              Liberar Espacio
-            </Button>
-          </Card.Body>
-        </Card>
+            <p style={{ fontSize: '1.2rem', fontStyle: 'italic', color: '#555' }}>
+              Liberando espacio de disco, por favor espera...
+            </p>
+          </div>
+        </div>
+      )}
+    </Card>
       </Col>
     </Row>
     </Container>
