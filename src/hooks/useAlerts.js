@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import alertas from '../utilities/alerts/alerts'; 
 
 const useAlerts = (disk, porcentajeUsado, selectedDisk, thresholds, convertToGB) => {

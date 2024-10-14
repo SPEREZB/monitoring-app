@@ -1,7 +1,5 @@
+import alertas from "../utilities/alerts/alerts";  
 import io from "socket.io-client";
- 
-import Swal from 'sweetalert2'; // Para las alertas de MySwal
-
 const socket = io("http://127.0.0.1:5000"); 
 
 export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, setDiskErrors,setTasaDeteccion, setIsLoading, setIsError, handleNewAlert) => {
@@ -46,12 +44,7 @@ export const socketIO = (index, setAlerts, setDefinitions, setDiskUsagePercent, 
             }
         } catch (error) {
             console.error(error.message);
-            Swal.fire({
-                title: "Error de Disco",
-                text: "El disco ha sufrido un error o ha sido retirado.",
-                icon: "error",
-                confirmButtonText: "Aceptar",
-            });
+            alertas("Error de Disco", "El disco ha sufrido un error o ha sido retirado.","error") 
             setIsError(true);
             setIsLoading(false);
         }

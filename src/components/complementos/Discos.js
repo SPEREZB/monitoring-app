@@ -1,7 +1,7 @@
 import { Row, Col, Card, Button } from "react-bootstrap";
 import { useEffect, useState } from "react"; 
 import diskInterceptor from './../../interceptors/diskInterceptor';
-import format from "../../utilities/formated/formated";  
+import format from "../../utilities/formated/formated";   
 
 const Discos = ({
   disk,
@@ -17,6 +17,7 @@ const Discos = ({
   const {getDisks, removeDisk} = diskInterceptor();
 
   const {formatBytes} = format();
+ 
  
   const handleAddDisk = async () => {
     const response= await getDisks(); 

@@ -1,8 +1,6 @@
 import axios from "axios"; 
 import alertas from "../utilities/alerts/alerts";
-import AlmacenamientoProvider from "../provider/AlmacenamientoProvider";
-import BalancedLoad from "../components/statesLoad/BalancedLoad";
-import TrashLoad from "../components/statesLoad/TrashLoad";
+import AlmacenamientoProvider from "../provider/AlmacenamientoProvider"; 
 
 const useDiskInterceptor =()=>
 {
