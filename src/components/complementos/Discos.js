@@ -19,8 +19,8 @@ const Discos = ({
   const {formatBytes} = format();
  
   const handleAddDisk = async () => {
-   const response= await getDisks(); 
-   const formattedDevices = response.data.devices.map((device) => {
+    const response= await getDisks(); 
+    const formattedDevices = response.data.devices.map((device) => {
     const usedBytes = device.used; // device.used en bytes
     const totalBytes = device.size; // device.size en bytes
 
@@ -34,20 +34,13 @@ const Discos = ({
     };
   });
 
-  setDisk(formattedDevices);
-  setSmartDevices(response.data.smartctl_devices);
-  setIsLoading(true);
+    setDisk(formattedDevices);
+    setSmartDevices(response.data.smartctl_devices);
+    setIsLoading(true);
   };
 
   const handleRemoveDisk = () => {
-    diskInterceptor.errorDisk();
-    if (selectedDiskIndex !== null) {
-      const updatedDisks = disk.filter((_, index) => index !== selectedDiskIndex);
-      setDisk(updatedDisks);
-      console.log("Disco eliminado.");
-    } else {
-      console.log("No hay disco seleccionado para eliminar.");
-    }
+    removeDisk(selectedDiskIndex); 
   };
  
 
@@ -60,7 +53,7 @@ const Discos = ({
       }
     };
 
-    fetchDevices();
+   fetchDevices();
   }, [reloadDiscos]);
 
   return (
@@ -177,7 +170,7 @@ const Discos = ({
             style={{ fontSize: "1.2rem", display: "flex", alignItems: "center" }}
           >
             <i className="bi bi-trash-fill me-2" style={{ fontSize: "1.5rem" }}></i>
-            Eliminar Disco
+            Quitar Disco
           </Button>
         </Col>
       </Row>

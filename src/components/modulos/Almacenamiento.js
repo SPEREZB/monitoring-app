@@ -1,99 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useContext  } from 'react';
 import axios from 'axios';
 import Discos from "../complementos/Discos"; 
-import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar, Spinner } from 'react-bootstrap'; 
+import AlmacenamientoProvider from '../../provider/AlmacenamientoProvider';
+import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar } from 'react-bootstrap'; 
 import alertas from '../../utilities/alerts/alerts';
-import 'bootstrap-icons/font/bootstrap-icons.css'; 
-import balanza from './../../assets/balanza.gif' 
-import trash from './../../assets/trash.gif' 
+import 'bootstrap-icons/font/bootstrap-icons.css';  
 import diskInterceptor from '../../interceptors/diskInterceptor';
 import formated from '../../utilities/formated/formated';
+import BalancedLoad from '../statesLoad/BalancedLoad';
+import TrashLoad from '../statesLoad/TrashLoad';
+import useAlerts from '../../hooks/useAlerts';
 
 
 const Almacenamiento = () => {
-  const [storageInfo, setStorageInfo] = useState({
-    capacity: 100,
-    used_space: 40,
-    available_space: 60,
-  });
-  const [usedSpace, setUsedSpace] = useState('');
-  const [capacity, setCapacity] = useState(''); 
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [balancing, setBalancing] = useState(false); 
-  const [trashConst, setTrash] = useState(false); 
-  const [reloadDiscos, setReloadDiscos] = useState(false);  
-  const [disk, setDisk] = useState([]);
-  const [smartDevices, setSmartDevices] = useState([]); 
-  const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
-  const [selectedDisk, setSelectedDisk] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); 
-  const porcentajeUsado = (storageInfo.used_space / storageInfo.capacity) * 100; 
-  const [alertasMostradas, setAlertasMostradas] = useState([]); 
-  const [criticalThreshold, setCriticalThreshold] = useState(100); 
-  const [warningThreshold, setWarningThreshold] = useState(90);   
-  const [generalThreshold, setGeneralThreshold] = useState(80); 
-  const [rutaCache, setRutaCache] = useState('');
+  const {
+    usedSpace,
+    setUsedSpace,
+    capacity,
+    setCapacity,
+    error,
+    setError,
+    success,
+    setSuccess,
+    loading,
+    reloadDiscos,
+    setReloadDiscos,
+    disk,
+    setDisk,
+    smartDevices,
+    setSmartDevices,
+    selectedDiskIndex,
+    setSelectedDiskIndex,
+    selectedDisk,
+    setSelectedDisk,
+    isLoading,
+    setIsLoading, 
+    criticalThreshold,
+    setCriticalThreshold,
+    warningThreshold,
+    setWarningThreshold,
+    generalThreshold,
+    setGeneralThreshold,
+    porcentajeUsado,
+    setStorageInfo,
+    rutaCache,
+    setRutaCache, 
+} = AlmacenamientoProvider();
+ 
 
-  const {choose_disk, balancedDisk, liberarDisk} = diskInterceptor();
+  const {choose_disk, balancedDisk, liberarDisk, balancing, trashConst} = diskInterceptor();
   const {convertToGB}= formated();
 
-  const fetchStorageInfo = async () => {
-    setLoading(true);
+  const thresholds = { generalThreshold, warningThreshold, criticalThreshold };
+  const { verificarAlertas, alertasMostradas, setAlertasMostradas } = useAlerts(disk, porcentajeUsado, selectedDisk, thresholds,convertToGB);
+
+  const fetchStorageInfo = async () => { 
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/data');
-      setStorageInfo(response.data);
-      setError(null);
-      setSuccess(null);
+  
     } catch (err) {
       setError('Error al obtener información de almacenamiento');
       setSuccess(null);
     } finally {
-      setLoading(false);
-    }
-  };
- 
-
-  const handleModifySpaceAndCapacity = (e) => {
-    e.preventDefault();
-    const newUsedSpace = parseInt(usedSpace);
-    const newCapacity = parseInt(capacity);
-    if (newUsedSpace > newCapacity) {
-      setError('El espacio utilizado no puede ser mayor que la capacidad total.');
-      setSuccess(null);
-    } else {
-      setStorageInfo({
-        capacity: newCapacity,
-        used_space: newUsedSpace,
-        available_space: newCapacity - newUsedSpace,
-      }); 
-      setSuccess('Espacio y capacidad actualizados correctamente.');
-      setError(null);
+  
     }
   }; 
-  const liberarEspacio = () => {
-    const newAvailableSpace = storageInfo.available_space + 10;
-    const newUsedSpace = storageInfo.used_space - 10;
-    if (newUsedSpace < 0) {
-      setError('No puedes liberar más espacio del que está utilizado.');
-      setSuccess(null);
-    } else {
-      setStorageInfo({
-        ...storageInfo,
-        available_space: newAvailableSpace,
-        used_space: newUsedSpace
-      });
-      setSuccess('Espacio liberado con éxito');
-      setError(null);
-    }
-  };
- 
   const handleBalanceDisks = async () => {
-    try {  
-      setBalancing(true);  
-      const response = await balancedDisk(disk);
-      setBalancing(false); 
+    try {   
+      const response = await balancedDisk(disk); 
       setReloadDiscos(prevState => !prevState);
       const data = response.data;
       
@@ -114,64 +87,25 @@ const Almacenamiento = () => {
   }; 
 
   const handleDiskSelection = (index, device) => {
-    setIsLoading(true);
-    diskIndex = index;
-    setSelectedDiskIndex(index);
-    hasShownCriticalAlert = false;
+    setIsLoading(true); 
+    setSelectedDiskIndex(index); 
     setSelectedDisk(device);
     choose_disk(device);
   }; 
 
   const handleLiberar = async (ruta) => {
     if(rutaCache!="" && rutaCache!=undefined)
-    {
-
-    
-      setTrash(true);
+    {  
       const response = await liberarDisk(rutaCache); 
 
-      setTimeout(() => {
-        setTrash(false);
-        alertas("Espacio liberado con éxito", "Se ha liberado: "+ response.data +" archivos", "success");
-      }, 4000);
+      alertas("Espacio liberado con éxito", "Se ha liberado: "+ response.data +" archivos", "success");
+    }else
+    {
+      alertas("Debe escribir el nombre de usuario de su disco", "", "warning");
     }
-  }; 
-
-
-
-  let diskIndex;
-  let hasShownCriticalAlert = false;
-   
-
-  
-  const verificarAlertas = () => {
-    disk.forEach((discos, index) => {
-      const sizeNum = convertToGB(discos.size);
-      const usedNum = convertToGB(discos.used);
-  
-      const porcentajeUtilizado = (usedNum / sizeNum) * 100;
-  
-      if (porcentajeUtilizado > warningThreshold && !alertasMostradas.includes(discos.filesystem)) {
-        alertas(`¡Advertencia! Disco ${discos.filesystem}`, `El disco está utilizando el ${porcentajeUtilizado.toFixed(2)}% del espacio. ¡Considera liberar espacio!`, "warning");
-        setAlertasMostradas((prevAlertas) => [...prevAlertas, discos.filesystem]);
-      }
-    });
-  
-    if (porcentajeUsado > generalThreshold && !alertasMostradas.includes("basica")) {
-      alertas("¡Alerta basica!", `El almacenamiento supera el ${generalThreshold}%. ¡Considera añadir otro disco!`, "info");
-      setAlertasMostradas((prevAlertas) => [...prevAlertas, "basica"]);
-    }
-  
-    if (porcentajeUsado > criticalThreshold && !alertasMostradas.includes("fallo")) {
-      alertas("¡Peligro de fallo en el disco!", `El uso del disco está al ${criticalThreshold}%. Esto podría malograr el disco. ¡Libera espacio de inmediato!`, "error");
-      setAlertasMostradas((prevAlertas) => [...prevAlertas, "fallo"]);
-    }
-  
-    if (selectedDisk && porcentajeUsado > criticalThreshold && !alertasMostradas.includes("fallo en cierto disco")) {
-      alertas(`Disco ${selectedDisk} al límite`, "El disco seleccionado está casi lleno. ¡Considera retirarlo antes de dañarlo!", "error");
-      setAlertasMostradas((prevAlertas) => [...prevAlertas, "fallo en cierto disco"]);
-    }
-  }; 
+  };   
+    
+ 
 
   const handleModifyThresholds = (e) => {
     e.preventDefault();
@@ -229,21 +163,10 @@ const Almacenamiento = () => {
 
           {error && <Alert variant="danger">{error}</Alert>}
           {success && <Alert variant="success">{success}</Alert>}
-      {balancing && (
-  <div className="overlay">
-  <div className="overlay-content-balanced">
-    <img 
-      src={balanza} 
-      alt="Balanceando..." 
-      style={{ width: '100%', maxWidth: '150px', height: 'auto' }} 
-    />
-    <p style={{ fontSize: '1.2rem', fontStyle: 'italic', color: '#555' }}>
-      Ajustando el espacio entre los discos, por favor espera...
-    </p>
-  </div>
-</div> 
+     
+          {balancing && ( 
+   <BalancedLoad />
       )}
- 
  {disk.length === 0 ? ( 
   <Card className="mb-4 shadow-lg">
     <Card.Body>
@@ -341,7 +264,7 @@ const Almacenamiento = () => {
             <Form.Group controlId="warningThreshold">
               <Form.Label className="d-flex align-items-center">
                 <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                Umbral de advertencia (%)
+                Umbral de advertencia media (%)
               </Form.Label>
               <Form.Control
                 type="number"
@@ -360,7 +283,7 @@ const Almacenamiento = () => {
             <Form.Group controlId="criticalThreshold">
               <Form.Label className="d-flex align-items-center">
                 <i className="bi bi-exclamation-circle-fill text-danger me-2"></i>
-                Umbral crítico (%)
+                Umbral de advertencia crítica (%)
               </Form.Label>
               <Form.Control
                 type="number"
@@ -379,7 +302,7 @@ const Almacenamiento = () => {
             <Form.Group controlId="generalThreshold">
               <Form.Label className="d-flex align-items-center">
                 <i className="bi bi-circle-fill text-info me-2"></i>
-                Umbral basico (%)
+                Umbral de advertencia leve (%)
               </Form.Label>
               <Form.Control
                 type="number"
@@ -398,72 +321,7 @@ const Almacenamiento = () => {
         <Button variant="primary" type="submit" className="mt-3 mb-3">Guardar Umbrales</Button>
       </Form>
     </div>
-    </Card>
-      <Card className="mb-4 shadow-lg">
-        <Card.Body> 
-        <Form onSubmit={handleModifySpaceAndCapacity}>
-      <Row>
-        <Col xs={12} md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Capacidad Total</Form.Label>
-            <Form.Control
-              type="number"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              min="0"  
-              placeholder="Introduce la capacidad total en GB"
-            />
-          </Form.Group>
-        </Col>
-
-        <Col xs={12} md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Espacio Utilizado</Form.Label>
-            <Form.Control
-              type="number"
-              value={usedSpace}
-              onChange={(e) => setUsedSpace(e.target.value)}
-              min="0" 
-              placeholder="Introduce el espacio utilizado en GB"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={12} md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Capacidad Total</Form.Label>
-            <Form.Control
-              type="range"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              min="0"
-              max="1000" 
-            />
-          </Form.Group>
-        </Col>
-
-        <Col xs={12} md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Espacio Utilizado</Form.Label>
-            <Form.Control
-              type="range"
-              value={usedSpace}
-              onChange={(e) => setUsedSpace(e.target.value)}
-              min="0"
-              max={capacity}  
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Button variant="primary" type="submit">
-        Actualizar Espacio y Capacidad
-      </Button>
-    </Form>
-        </Card.Body>
-      </Card>
+    </Card> 
  
       <Row> 
  
@@ -496,21 +354,9 @@ const Almacenamiento = () => {
       </div>
     </div>
   </div>
-</Card.Body>
- 
-      {trashConst && (
-        <div className="overlay">
-          <div className="overlay-content-balanced">
-            <img 
-              src={trash} 
-              alt="Balanceando..." 
-              style={{ width: '100%', maxWidth: '150px', height: 'auto' }} 
-            />
-            <p style={{ fontSize: '1.2rem', fontStyle: 'italic', color: '#555' }}>
-              Liberando espacio de disco, por favor espera...
-            </p>
-          </div>
-        </div>
+</Card.Body> 
+{trashConst && ( 
+       <TrashLoad />
       )}
     </Card>
       </Col>

@@ -1,39 +1,55 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import React, { useContext } from "react"; 
 import { Container, Row, Col, Card, Spinner, Button, Modal  } from "react-bootstrap"; 
 import Error_Reports from "../complementos/Error_Reports";
-import Discos from "../complementos/Discos";
+import Discos from "../complementos/Discos";  
+import MantenimientoProvider from "../../provider/MantenimientoProvider";
 import './../../styles/mantenimiento.css';  
 import { socketIO } from "../../services/socketIO"
 import diskInterceptor from '../../interceptors/diskInterceptor';
 import alertas from "./../../utilities/alerts/alerts" 
+import useRouter from '../../hooks/useRouter';
  
 
 const Mantenimiento = () => {
-  const [alerts, setAlerts] = useState([]);
-  const [definitions, setDefinitions] = useState([]);
-  const [disk, setDisk] = useState([]);
-  const [smartDevices, setSmartDevices] = useState([]);
-  const [selectedDisk, setSelectedDisk] = useState(null);
-  const [selectedDiskIndex, setSelectedDiskIndex] = useState(null);
-  const [showOverlay, setShowOverlay] = useState(false);  
-  const [diskUsagePercent, setDiskUsagePercent] = useState(0);
-  const [diskErrors, setDiskErrors] = useState(0);
-  const [tasaDeteccion, setTasaDeteccion] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [showModal, setShowModal] = useState(false); 
-  const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false); 
-  const navigate = useNavigate(); 
+ 
+  const {
+    alerts,
+    setAlerts,
+    definitions,
+    setDefinitions,
+    disk,
+    setDisk,
+    smartDevices,
+    setSmartDevices,
+    selectedDisk,
+    setSelectedDisk,
+    selectedDiskIndex,
+    setSelectedDiskIndex,
+    showOverlay,
+    setShowOverlay,
+    diskUsagePercent,
+    setDiskUsagePercent,
+    diskErrors,
+    setDiskErrors,
+    tasaDeteccion,
+    setTasaDeteccion,
+    isLoading,
+    setIsLoading,
+    isError,
+    setIsError,
+    showModal,
+    setShowModal,
+    handleShowModal,
+    handleCloseModal,
+    navigate,
+  } = MantenimientoProvider();
 
   const {choose_disk} = diskInterceptor();
+  const {handleReportes} = useRouter();
 
   let diskIndex;
   let hasShownCriticalAlert = false;
-
-     
-
+ 
   const handleNewAlert = async (newAlerts, definitions) => {
     let startIndex = 0;
     while (startIndex < newAlerts.length) {
@@ -69,7 +85,7 @@ const Mantenimiento = () => {
   }; 
 
   const navigateToErrorReports = () => { 
-    navigate('reportes');
+    handleReportes();
   };
 
   const closeOverlay = () => {

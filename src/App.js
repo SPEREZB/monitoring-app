@@ -1,19 +1,21 @@
 import React, { useState } from 'react'; 
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; 
 import { Container, Card } from 'react-bootstrap';
 import Reconstruccion from './components/modulos/Reconstruccion';
 import Almacenamiento from './components/modulos/Almacenamiento';
 import Mantenimiento from './components/modulos/Mantenimiento'; 
-import Error_Reports from './components/complementos/Error_Reports'; 
+import Error_Reports from './components/complementos/Error_Reports';  
+
+import useRouter from './hooks/useRouter';
 import './App.css'; 
 
-const CardItem = ({ title, iconClass, description, link, color }) => {
-  const navigate = useNavigate();
+const CardItem = ({ title, iconClass, description, link, color }) => { 
+  const { handleModulos} = useRouter();
   const [bgColor, setBgColor] = useState('white'); 
 
   const handleClick = () => {
     setBgColor('white'); 
-    navigate(link);
+    handleModulos(link);
   };
 
   return (
