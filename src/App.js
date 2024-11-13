@@ -1,10 +1,11 @@
 import React, { useState } from 'react'; 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; 
 import { Container, Card } from 'react-bootstrap';
-import Reconstruccion from './components/modulos/Reconstruccion';
 import Almacenamiento from './components/modulos/Almacenamiento';
 import Mantenimiento from './components/modulos/Mantenimiento'; 
-import Error_Reports from './components/complementos/Error_Reports';  
+import Reconstruccion from './components/modulos/Reconstruccion';
+import Inconsistencias from './components/modulos/Inconsistencias';
+import Error_Reports from './components/complementos/Error_Reports';
 
 import useRouter from './hooks/useRouter';
 import './App.css'; 
@@ -19,6 +20,7 @@ const CardItem = ({ title, iconClass, description, link, color }) => {
   };
 
   return (
+ 
     <Card 
       className="text-center card-hover" 
       style={{ 
@@ -66,16 +68,16 @@ const App = () => {
               title="Recuperación de datos"
               iconClass="bi bi-tools"
               description="Recuperación de datos ante fallos críticos."
-              link="/codificador"
+              link="/fragmentador"
               color="#007bff"
             />
           </div>
           <div className="card-column">
             <CardItem
-              title="Resolver inconsistencias"
+              title="Comprobar inconsistencias"
               iconClass="bi bi-exclamation-triangle"
-              description="Resolver inconsistencias en los datos."
-              link="/resolver-inconsistencias"
+              description="Comprobar inconsistencias en los datos."
+              link="/inconsistencias"
               color="#dc3545"
             />
           </div>
@@ -84,7 +86,8 @@ const App = () => {
           <Routes>
             <Route path="/mantenimiento" element={<Mantenimiento />} />
             <Route path="/almacenamiento" element={<Almacenamiento />} />
-            <Route path="/codificador" element={<Reconstruccion />} /> 
+            <Route path="/fragmentador" element={<Reconstruccion />} /> 
+            <Route path="/inconsistencias" element={<Inconsistencias />} /> 
             <Route path="/mantenimiento/reportes" element={<Error_Reports />} /> 
 
           </Routes>

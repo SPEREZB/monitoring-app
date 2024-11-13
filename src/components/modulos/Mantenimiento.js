@@ -5,7 +5,7 @@ import Discos from "../complementos/Discos";
 import MantenimientoProvider from "../../provider/MantenimientoProvider";
 import './../../styles/mantenimiento.css';  
 import { socketIO } from "../../services/socketIO"
-import diskInterceptor from '../../interceptors/diskInterceptor';
+import diskServices from "../../services/diskServices";
 import alertas from "./../../utilities/alerts/alerts" 
 import useRouter from '../../hooks/useRouter';
  
@@ -44,7 +44,7 @@ const Mantenimiento = () => {
     navigate,
   } = MantenimientoProvider();
 
-  const {choose_disk} = diskInterceptor();
+  const {choose_disk} = diskServices();
   const {handleReportes} = useRouter();
 
   let diskIndex;
@@ -110,7 +110,7 @@ const Mantenimiento = () => {
           <>
             <Row>
               <Col>
-                <h1 className="text-center">Monitoreo de Almacenamiento</h1>
+                <h1 className="text-center text-warning">Monitoreo de Almacenamiento</h1>
               </Col>
             </Row>
 

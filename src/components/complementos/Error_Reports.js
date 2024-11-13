@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Container } from 'react-bootstrap';
 import reportsInterceptor from "../../interceptors/reportsInterceptor";
+import { API_URL } from "../../utilities/API";
 
 const Error_Reports = () => { 
   const [errorAlerts, setAlerts] = useState([]);
@@ -16,7 +17,7 @@ const Error_Reports = () => {
   const check_identified_errors = async () => { 
 
     const response = await axios.get(
-      "http://127.0.0.1:5000/api/identified_alerts"
+      API_URL+"/identified_alerts"
     );
       
     setState(response.data.state);
@@ -48,7 +49,7 @@ const Error_Reports = () => {
             borderRadius: "12px",
             transition: "transform 0.3s ease",
             cursor: "pointer",
-            backgroundColor: "#fff3f3", // Fondo suave
+            backgroundColor: "#fff3f3", 
           }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}

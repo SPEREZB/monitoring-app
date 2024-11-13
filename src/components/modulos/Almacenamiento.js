@@ -1,11 +1,10 @@
-import React, { useEffect, useContext  } from 'react';
-import axios from 'axios';
+import React, { useEffect, useContext  } from 'react'; 
 import Discos from "../complementos/Discos"; 
 import AlmacenamientoProvider from '../../provider/AlmacenamientoProvider';
 import { Container, Card, Button, Form, Alert, Row, Col, ProgressBar } from 'react-bootstrap'; 
 import alertas from '../../utilities/alerts/alerts';
 import 'bootstrap-icons/font/bootstrap-icons.css';  
-import diskInterceptor from '../../interceptors/diskInterceptor';
+import diskServices from "../../services/diskServices"
 import formated from '../../utilities/formated/formated';
 import BalancedLoad from '../statesLoad/BalancedLoad';
 import TrashLoad from '../statesLoad/TrashLoad';
@@ -48,22 +47,12 @@ const Almacenamiento = () => {
 } = AlmacenamientoProvider();
  
 
-  const {choose_disk, balancedDisk, liberarDisk, balancing, trashConst} = diskInterceptor();
+  const {choose_disk, balancedDisk, liberarDisk, balancing, trashConst} = diskServices();
   const {convertToGB}= formated();
 
   const thresholds = { generalThreshold, warningThreshold, criticalThreshold };
   const { verificarAlertas, alertasMostradas, setAlertasMostradas } = useAlerts(disk, porcentajeUsado, selectedDisk, thresholds,convertToGB);
-
-  const fetchStorageInfo = async () => { 
-    try {
-  
-    } catch (err) {
-      setError('Error al obtener información de almacenamiento');
-      setSuccess(null);
-    } finally {
-  
-    }
-  }; 
+ 
   const handleBalanceDisks = async () => {
     try {   
       const response = await balancedDisk(disk); 
@@ -115,11 +104,7 @@ const Almacenamiento = () => {
     setSuccess("Umbrales actualizados correctamente.");
     verificarAlertas();
   };
-  
-
-  useEffect(() => {
-    fetchStorageInfo();
-  }, []);
+   
    
   useEffect(() => {
     const interval = setInterval(() => {
@@ -148,7 +133,7 @@ const Almacenamiento = () => {
         </div>
       )}
 
-      <h1 className="text-center">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1> 
+      <h1 className="text-center text-success">Gestión de Almacenamiento <i className="bi bi-hdd-stack"></i></h1> 
    
       <div className="text-center mb-4">
         <Button

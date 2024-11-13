@@ -1,6 +1,6 @@
 import { Row, Col, Card, Button } from "react-bootstrap";
 import { useEffect, useState } from "react"; 
-import diskInterceptor from './../../interceptors/diskInterceptor';
+import diskServices from "../../services/diskServices";
 import format from "../../utilities/formated/formated";   
 
 const Discos = ({
@@ -14,7 +14,7 @@ const Discos = ({
 }) => {
   const [reloadDiscos, setReloadDiscos] = useState(false);
 
-  const {getDisks, removeDisk} = diskInterceptor();
+  const {getDisks, removeDisk} = diskServices();
 
   const {formatBytes} = format();
  
