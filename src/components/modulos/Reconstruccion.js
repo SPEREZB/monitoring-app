@@ -34,7 +34,7 @@ const Reconstruccion = () => {
         const result = await encode_disk(rutaCodificar);
         setCoding(false);
         setResultadoCodificado(
-          `Ruta de archivos fragmentados: ${result.ruta}. \n Numero total de archivos fragmentados: ${result.blocks_encoded}`
+          `Ruta de archivos fragmentados: ${result.ruta}. \n Numero total de bloques fragmentados: ${result.blocks_encoded}`
         );
         handleGetSubdirectories();
         alertas("Exito", "Fragmentación exitosa.", "success");
