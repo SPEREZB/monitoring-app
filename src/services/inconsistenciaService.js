@@ -15,18 +15,16 @@ const useInconsistenciaService =()=>
     const analizarInconsistency = async (folder) => {
         try { 
             const response = await API_URL.post("/analizar", {folder});
-            const data = response.data;
- 
-            return Object.entries(data).map(([nombre, estado], index) => ({
-              id: index + 1,
-              nombre,
-              fecha: new Date().toLocaleDateString(), 
-              estado: 
-                estado === 'Archivo válido.' ? 'Valido' :
-                estado === 'Es una carpeta' ? 'Carpeta' :
-                estado === 'No es un archivo válido.' ? 'Inconsistente' :
-                estado === 'El archivo está vacío.' ? 'Inconsistente' : estado,
-            }));
+            return response.data; 
+        } catch (error) {
+            console.error('Error al obtener discos:', error);
+            throw error;  
+        }
+    };
+    const analizarParidad = async (folder) => {
+        try { 
+            const response = await API_URL.post("/get_parity_for_name", {folder});
+            return response.data; 
         } catch (error) {
             console.error('Error al obtener discos:', error);
             throw error;  
@@ -41,6 +39,6 @@ const useInconsistenciaService =()=>
             throw error;  
         }
     };
-    return {getInconsistency, analizarInconsistency, resolverInconsistency};
+    return {getInconsistency, analizarInconsistency, analizarParidad, resolverInconsistency};
 };
 export default useInconsistenciaService;
